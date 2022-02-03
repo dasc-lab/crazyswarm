@@ -33,8 +33,6 @@ The official documentation in crazyswarm is pretty good. Id highly recommend rea
 
 As of Feb 2 2022, Ubuntu 20 installation worked, but ubuntu 18 did not work for us. Some issue in the libmotioncapture sdk. 
 
-## SOFTWARE INSTALLATION
-
 You will need
 1. ROS
 2. cfclient (`python3 -m pip install cfclient`)
@@ -43,7 +41,7 @@ You will need
 5. We used Ubuntu 20, and Python3
 
 
-## HARDWARE SETUP
+## Hardware Setup
 
 
 1. Update the radio firmware following instructions here: https://github.com/bitcraze/crazyradio-firmware
