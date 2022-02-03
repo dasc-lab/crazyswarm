@@ -85,3 +85,10 @@ IN TERMINAL 2:
   
   
   
+  ## Two Quad Figure of 8
+  
+  1. update `allcrazyflies.yaml` appropriately and run `python3 chooser.py` to set the correct quads up. 
+  2. source the `ros_ws/devel/setup.py` in each terminal.
+  3. In one terminal run `roslaunch crazyswarm hover_launch.launch`
+  4. In a second terminal run `python3 figure_8_simple.py`
+  
