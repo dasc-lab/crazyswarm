@@ -1,0 +1,4 @@
+[35m[1mScanning dependencies of target libobjecttracker[0m
+[ 50%] [32mBuilding CXX object CMakeFiles/libobjecttracker.dir/src/object_tracker.cpp.o[0m
+[100%] [32m[1mLinking CXX shared library /home/dasclab/crazyswarm/ros_ws/devel/.private/libobjecttracker/lib/liblibobjecttracker.so[0m
+[100%] Built target libobjecttracker

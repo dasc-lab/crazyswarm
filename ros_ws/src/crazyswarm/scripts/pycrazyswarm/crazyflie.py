@@ -585,9 +585,9 @@ class CrazyflieServer:
 
         if crazyflies_yaml.endswith(".yaml"):
             with open(crazyflies_yaml, 'r') as ymlfile:
-                cfg = yaml.load(ymlfile)
+                cfg = yaml.load(ymlfile, Loader=yaml.CLoader)
         else:
-            cfg = yaml.load(crazyflies_yaml)
+            cfg = yaml.load(crazyflies_yaml, Loader=yaml.CLoader)
 
         self.tf = TransformListener()
 

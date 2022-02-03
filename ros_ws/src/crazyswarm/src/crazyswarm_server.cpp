@@ -1470,10 +1470,13 @@ public:
         hostname.c_str()
       );
       mocap.reset(libmotioncapture::MotionCapture::connect(motionCaptureType, cfg));
+      ROS_INFO("libmotioncapture: MOTION CAPTURE ACQUIRED");
       if (!mocap) {
         throw std::runtime_error("Unknown motion capture type!");
       }
     }
+
+
 
     pcl::PointCloud<pcl::PointXYZ>::Ptr markers(new pcl::PointCloud<pcl::PointXYZ>);
     std::map<std::string, libmotioncapture::RigidBody> mocapRigidBodies;
@@ -1487,7 +1490,7 @@ public:
         auto handle = std::async(std::launch::async,
             [&](int channel, int radio)
             {
-              // std::cout << "radio: " << radio << std::endl;
+              std::cout << "radio: " << radio << std::endl;
               return new CrazyflieGroup(
                 dynamicsConfigurations,
                 markerConfigurations,
@@ -1507,18 +1510,26 @@ public:
           );
         handles.push_back(std::move(handle));
         ++r;
+
       }
 
+
+	
       for (auto& handle : handles) {
         m_groups.push_back(handle.get());
       }
+
     }
+
+
 
     // start the groups threads
     std::vector<std::thread> threads;
     for (auto& group : m_groups) {
       threads.push_back(std::thread(&CrazyflieGroup::runSlow, group));
     }
+
+
 
     ROS_INFO("Started %lu threads", threads.size());
 
@@ -1915,7 +1926,7 @@ int main(int argc, char **argv)
   // raise(SIGSTOP);
 
   ros::init(argc, argv, "crazyflie_server");
-
+  ROS_INFO("STARTING CRAZYSERVER");
   // ros::NodeHandle n("~");
   // std::string worldFrame;
   // n.param<std::string>("world_frame", worldFrame, "/world");
@@ -1945,7 +1956,7 @@ int main(int argc, char **argv)
     cfIds.insert(id);
   }
 
-  // ROS_INFO("All CFs are ready!");
+  ROS_INFO("All CFs are ready!");
 
   server.run();
 

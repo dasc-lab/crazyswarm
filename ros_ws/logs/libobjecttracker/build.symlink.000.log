@@ -1,0 +1,4 @@
+Symlinking /home/dasclab/crazyswarm/ros_ws/devel/share/libobjecttracker/cmake/libobjecttrackerConfig.cmake
+Symlinking /home/dasclab/crazyswarm/ros_ws/devel/share/libobjecttracker/cmake/libobjecttrackerConfig-version.cmake
+Symlinking /home/dasclab/crazyswarm/ros_ws/devel/lib/liblibobjecttracker.so
+Symlinking /home/dasclab/crazyswarm/ros_ws/devel/lib/pkgconfig/libobjecttracker.pc
