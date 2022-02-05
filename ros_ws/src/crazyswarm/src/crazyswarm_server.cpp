@@ -182,8 +182,12 @@ public:
 
       if (m_enablePublishStateEstimate) {
         ROS_INFO("PUBLISHING STATE ESTIMATES");
-        m_pubStateEstimate = n.advertise<geometry_msgs::PoseStamped>(m_tf_prefix + "/stateEstimate", 10);
-        m_subscribeLogPos = n.subscribe(tf_prefix + "/log_pos", 10, &CrazyflieROS::logPosCallback, this);
+        m_pubStateEstimate = n.advertise<crazyswarm::FullState>(m_tf_prefix + "/stateEstimate", 10);
+        m_subscribeLogPos  = n.subscribe(tf_prefix + "/log_pos", 10, &CrazyflieROS::logPosCallback, this);
+        m_subscribeLogVel  = n.subscribe(tf_prefix + "/log_vel", 10, &CrazyflieROS::logVelCallback, this);
+        m_subscribeLogAcc  = n.subscribe(tf_prefix + "/log_acc", 10, &CrazyflieROS::logAccCallback, this);
+        m_subscribeLogQuat = n.subscribe(tf_prefix + "/log_quat", 10, &CrazyflieROS::logQuatCallback, this);
+        m_subscribeLogRate = n.subscribe(tf_prefix + "/log_rate", 10, &CrazyflieROS::logRateCallback, this);
       }
 
       if (m_enableLoggingPose) {
@@ -415,7 +419,48 @@ public:
 
   void logPosCallback(const crazyswarm::GenericLogData msg){
 
-    m_fullStateEstimate.pose.position.x = msg.values[0];
+    m_fullStateEstimate.pose.position.x = msg.values[0]/1000;
+    m_fullStateEstimate.pose.position.y = msg.values[1]/1000;
+    m_fullStateEstimate.pose.position.z = msg.values[2]/1000;
+
+    
+
+  }
+
+  void logVelCallback(const crazyswarm::GenericLogData msg){
+
+    m_fullStateEstimate.twist.linear.x = msg.values[0]/1000;
+    m_fullStateEstimate.twist.linear.y = msg.values[1]/1000;
+    m_fullStateEstimate.twist.linear.z = msg.values[2]/1000;
+
+  }
+
+  void logAccCallback(const crazyswarm::GenericLogData msg){
+
+    m_fullStateEstimate.acc.x = msg.values[0]/1000;
+    m_fullStateEstimate.acc.y = msg.values[1]/1000;
+    m_fullStateEstimate.acc.z = msg.values[2]/1000;
+
+  }
+
+  void logQuatCallback(const crazyswarm::GenericLogData msg){
+
+    float q[4];
+    quatdecompress(msg.values[0], q);
+    m_fullStateEstimate.pose.orientation.x = q[0];
+    m_fullStateEstimate.pose.orientation.y = q[1];
+    m_fullStateEstimate.pose.orientation.z = q[2];
+    m_fullStateEstimate.pose.orientation.w = q[3];
+
+    m_pubStateEstimate.publish(m_fullStateEstimate); // only publish it once 
+
+  }
+
+  void logRateCallback(const crazyswarm::GenericLogData msg){
+    // order is roll, pitch, yaw
+    m_fullStateEstimate.twist.angular.x = msg.values[0]/1000; 
+    m_fullStateEstimate.twist.angular.y = msg.values[1]/1000; 
+    m_fullStateEstimate.twist.angular.z = msg.values[2]/1000; 
 
   }
 
@@ -744,7 +789,7 @@ private:
 
     pub->publish(msg);
 
-    m_pubStateEstimate.publish(m_fullStateEstimate);
+    
   }
 
 private:
@@ -773,7 +818,12 @@ private:
   ros::Subscriber m_subscribeCmdFullState;
   ros::Subscriber m_subscribeCmdVelocityWorld;
   ros::Subscriber m_subscribeCmdStop;
+
   ros::Subscriber m_subscribeLogPos;
+  ros::Subscriber m_subscribeLogVel;
+  ros::Subscriber m_subscribeLogAcc;
+  ros::Subscriber m_subscribeLogQuat;
+  ros::Subscriber m_subscribeLogRate;
 
   ros::Subscriber m_subscribeCmdHover; // Hover vel subscriber
 
@@ -795,16 +845,6 @@ private:
   bool m_initializedPosition;
   std::string m_messageBuffer;
 
-
-  float m_stateEstimate_x;
-  float m_stateEstimate_y;
-  float m_stateEstimate_z;
-  float m_stateEstimate_vx;
-  float m_stateEstimate_vy;
-  float m_stateEstimate_vz;
-  float m_stateEstimate_ax;
-  float m_stateEstimate_ay;
-  float m_stateEstimate_az;
 
   crazyswarm::FullState m_fullStateEstimate;
 

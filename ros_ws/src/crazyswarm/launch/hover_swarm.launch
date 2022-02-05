@@ -46,7 +46,7 @@
       force_no_cache: False
       enable_parameters: True
       enable_logging: True
-      enable_logging_pose: True
+      enable_logging_pose: False
       enable_state_estimate_publish: True 
     </rosparam>
   </node>
