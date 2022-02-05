@@ -8,9 +8,13 @@
   <node pkg="crazyswarm" type="crazyswarm_server" name="crazyswarm_server" output="screen" >
     <rosparam>
       # Logging configuration (Use enable_logging to actually enable logging)
-      genericLogTopics: ["log1"]
-      genericLogTopicFrequencies: [10]
-      genericLogTopic_log1_Variables: ["stateEstimate.x", "ctrltarget.x"]
+      genericLogTopics: ["log_pos", "log_vel", "log_acc", "log_quat", "log_rate"]
+      genericLogTopicFrequencies: [10, 10, 10, 10, 10] # actually the period in ms. So writing "10" gives us an update rate of 100 hz
+      genericLogTopic_log_pos_Variables:  ["stateEstimateZ.x", "stateEstimateZ.y", "stateEstimateZ.z"] 
+      genericLogTopic_log_vel_Variables:  ["stateEstimateZ.vx", "stateEstimateZ.vy", "stateEstimateZ.vz"] 
+      genericLogTopic_log_acc_Variables:  ["stateEstimateZ.ax", "stateEstimateZ.ay", "stateEstimateZ.az"] 
+      genericLogTopic_log_quat_Variables: ["stateEstimateZ.quat"]
+      genericLogTopic_log_rate_Variables: ["stateEstimateZ.rateRoll", "stateEstimateZ.ratePitch", "stateEstimateZ.rateYaw"] 
       # firmware parameters for all drones (use crazyflieTypes.yaml to set per type, or
       # allCrazyflies.yaml to set per drone)
       firmwareParams:
@@ -27,7 +31,7 @@
           headlightEnable: 0
         locSrv:
           extPosStdDev: 1e-3
-          #extQuatStdDev: 0.5e-1
+          extQuatStdDev: 0.5e-1
         kalman:
           resetEstimation: 1
       # tracking
@@ -43,6 +47,7 @@
       enable_parameters: True
       enable_logging: True
       enable_logging_pose: True
+      enable_state_estimate_publish: True 
     </rosparam>
   </node>
 

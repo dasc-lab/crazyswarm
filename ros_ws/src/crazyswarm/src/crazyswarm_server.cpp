@@ -145,6 +145,7 @@ public:
   {
     ros::NodeHandle nl("~");
     nl.param("enable_logging", m_enableLogging, false);
+    nl.param("enable_state_estimate_publish", m_enablePublishStateEstimate, false); // NOTE REQUIRES enable_logging
     nl.param("enable_logging_pose", m_enableLoggingPose, false);
     nl.param("enable_parameters", m_enableParameters, true);
     nl.param("force_no_cache", m_forceNoCache, false);
@@ -178,6 +179,12 @@ public:
         }
       }
       m_logFile << std::endl;
+
+      if (m_enablePublishStateEstimate) {
+        ROS_INFO("PUBLISHING STATE ESTIMATES");
+        m_pubStateEstimate = n.advertise<geometry_msgs::PoseStamped>(m_tf_prefix + "/stateEstimate", 10);
+        m_subscribeLogPos = n.subscribe(tf_prefix + "/log_pos", 10, &CrazyflieROS::logPosCallback, this);
+      }
 
       if (m_enableLoggingPose) {
         m_pubPose = n.advertise<geometry_msgs::PoseStamped>(m_tf_prefix + "/pose", 10);
@@ -404,6 +411,12 @@ public:
     m_cf.setGroupMask(req.groupMask);
 
     return true;
+  }
+
+  void logPosCallback(const crazyswarm::GenericLogData msg){
+
+    m_fullStateEstimate.pose.position.x = msg.values[0];
+
   }
 
   void cmdVelChanged(
@@ -730,6 +743,8 @@ private:
     m_logFile << std::endl;
 
     pub->publish(msg);
+
+    m_pubStateEstimate.publish(m_fullStateEstimate);
   }
 
 private:
@@ -740,6 +755,7 @@ private:
   bool m_enableParameters;
   bool m_enableLogging;
   bool m_enableLoggingPose;
+  bool m_enablePublishStateEstimate;
   int m_id;
   std::string m_type;
 
@@ -757,6 +773,7 @@ private:
   ros::Subscriber m_subscribeCmdFullState;
   ros::Subscriber m_subscribeCmdVelocityWorld;
   ros::Subscriber m_subscribeCmdStop;
+  ros::Subscriber m_subscribeLogPos;
 
   ros::Subscriber m_subscribeCmdHover; // Hover vel subscriber
 
@@ -771,10 +788,28 @@ private:
   ros::Publisher m_pubPose;
   std::unique_ptr<LogBlock<logPose>> m_logBlockPose;
 
+  ros::Publisher m_pubStateEstimate;
+
   std::ofstream m_logFile;
   bool m_forceNoCache;
   bool m_initializedPosition;
   std::string m_messageBuffer;
+
+
+  float m_stateEstimate_x;
+  float m_stateEstimate_y;
+  float m_stateEstimate_z;
+  float m_stateEstimate_vx;
+  float m_stateEstimate_vy;
+  float m_stateEstimate_vz;
+  float m_stateEstimate_ax;
+  float m_stateEstimate_ay;
+  float m_stateEstimate_az;
+
+  crazyswarm::FullState m_fullStateEstimate;
+
+
+  
 };
 
 
@@ -968,7 +1003,7 @@ public:
         }
       }
       m_slowQueue.callAvailable(ros::WallDuration(0));
-      std::this_thread::sleep_for(std::chrono::milliseconds(10));
+      std::this_thread::sleep_for(std::chrono::milliseconds(1)); // DEV CHANGED THIS FROM 10 to 1!
     }
   }
 
