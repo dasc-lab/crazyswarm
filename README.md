@@ -92,3 +92,8 @@ IN TERMINAL 2:
   3. In one terminal run `roslaunch crazyswarm hover_launch.launch`
   4. In a second terminal run `python3 figure_8_simple.py`
   
+
+  ## notes:
+  
+  It might be useful to figure out which channel is best: https://blog.crazyflie.net/?p=18
+  
