@@ -1,3 +1,4 @@
+from matplotlib import lines
 import rosbag
 import numpy as np
 
@@ -7,6 +8,8 @@ import os
 import matplotlib
 import matplotlib.pyplot as plt
 from mpl_toolkits import mplot3d
+
+T_STAB = 4.0
 
 files = glob.glob("../bags/*.bag")
 
@@ -30,7 +33,7 @@ start = False
 start_t = None
 last_t = None
 
-for topic, msg, t in bag.read_messages(topics='/cf7/cmd_full_state'):
+for topic, msg, t in bag.read_messages(topics='/cf1/cmd_full_state'):
 
     if start is False:
         print(msg)
@@ -60,6 +63,10 @@ for topic, msg, t in bag.read_messages(topics=['/tf']):
 
 bag.close()
 
+start_t = start_t + T_STAB
+
+# print(start_t, last_t)
+
 cmd_inds = [i for i in range(len(ts)) if (ts[i] >= start_t) and (ts[i] <= last_t)]
 
 ts = [t - ts[0] for t in ts]
@@ -87,4 +94,10 @@ ax.plot3D(xs[cmd_inds], ys[cmd_inds], zs[cmd_inds], color="red")
 
 ax.plot3D(cmd_xs, cmd_ys, cmd_zs, ".g")
 
+fig = plt.figure()
+plt.plot(xs[cmd_inds], ys[cmd_inds], color="red")
+plt.plot(cmd_xs, cmd_ys, 'g.')
+
+plt.gca().set_aspect('equal')
+plt.axvline(x=0.75, linestyle='--')
 plt.show()

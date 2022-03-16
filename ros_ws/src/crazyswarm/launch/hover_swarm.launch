@@ -22,7 +22,7 @@
           enHighLevel: 1
         stabilizer:
           estimator: 2 # 1: complementary, 2: kalman
-          controller: 2 # 1: PID, 2: mellinger
+          controller: 3 # 1: PID, 2: mellinger, 3: geometric
         ring:
           effect: 16 # 6: double spinner, 7: solid color, 16: packetRate
           solidBlue: 255 # if set to solid color

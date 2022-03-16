@@ -185,20 +185,25 @@ if __name__ == '__main__':
 			subprocess.call(["rosrun crazyflie_tools reboot --uri " + uri], shell=True)
 
 	def flashSTM():
+		print("Trying to flash file at ", args.stm32Fw)
 		nodes = selected_cfs()
 		for crazyflie in nodes:
 			id = "{0:02X}".format(crazyflie["id"])
 			uri = "radio://0/{}/2M/E7E7E7E7{}".format(crazyflie["channel"], id)
 			print("Flash STM32 FW to {}".format(uri))
 			subprocess.call(["rosrun crazyflie_tools flash --uri " + uri + " --target stm32 --filename " + args.stm32Fw], shell=True)
+		print("DONE")
 
 	def flashNRF():
+		print("Trying to flash file at ", args.nrf51Fw)
 		nodes = selected_cfs()
 		for crazyflie in nodes:
 			id = "{0:02X}".format(crazyflie["id"])
 			uri = "radio://0/{}/2M/E7E7E7E7{}".format(crazyflie["channel"], id)
 			print("Flash NRF51 FW to {}".format(uri))
 			subprocess.call(["rosrun crazyflie_tools flash --uri " + uri + " --target nrf51 --filename " + args.nrf51Fw], shell=True)
+		print("DONE")
+
 
 	def checkBattery():
 		# reset color

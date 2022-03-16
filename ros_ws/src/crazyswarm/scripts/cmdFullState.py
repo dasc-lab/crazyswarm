@@ -37,7 +37,7 @@ if __name__ == "__main__":
     timeHelper = swarm.timeHelper
     cf = swarm.allcfs.crazyflies[0]
 
-    rate = 30.0
+    rate = 50.0
     Z = 0.5
 
     print("TAKEOFF")

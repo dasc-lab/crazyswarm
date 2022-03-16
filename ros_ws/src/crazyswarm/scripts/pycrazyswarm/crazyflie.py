@@ -2,6 +2,7 @@
 
 
 import sys
+from matplotlib.contour import QuadContourSet
 import yaml
 import rospy
 import numpy as np
@@ -337,6 +338,23 @@ class Crazyflie:
         self.tf.waitForTransform("/world", "/cf" + str(self.id), rospy.Time(0), rospy.Duration(10))
         position, quaternion = self.tf.lookupTransform("/world", "/cf" + str(self.id), rospy.Time(0))
         return np.array(position)
+
+    def pose(self):
+        """Returns the last true position and orientation measurement from motion capture.
+
+        If at least one position measurement for this robot has been received
+        from the motion capture system since startup, this function returns
+        immediately with the most recent measurement. However, if **no**
+        position measurements have been received, it blocks until the first
+        one arrives.
+
+        Returns:
+            position (np.array[3]): Current position. Meters.
+            quaternion (np.array[4]): Current orientation. Quaterion
+        """
+        self.tf.waitForTransform("/world", "/cf" + str(self.id), rospy.Time(0), rospy.Duration(10))
+        position, quaternion = self.tf.lookupTransform("/world", "/cf" + str(self.id), rospy.Time(0))
+        return np.array(position), np.array(quaternion)
 
     def getParam(self, name):
         """Returns the current value of the onboard named parameter.

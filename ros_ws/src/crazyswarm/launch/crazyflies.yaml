@@ -1,8 +1,8 @@
 crazyflies:
 - channel: 6
-  id: 7
+  id: 1
   initialPosition:
   - 0.0
   - 0.0
   - 0.0
-  type: default_xy_acceleration_mode
+  type: default_safety
