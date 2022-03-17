@@ -1068,6 +1068,22 @@ void kalmanCoreExternalizeState(const kalmanCoreData_t* this, state_t *state, co
       .z = this->q[3]
   };
 
+  // Externalise the covariance matrix as well (for now just externalising the diagonal components)
+  state->covMatrix = (covMatrix_t){
+    .timestamp = tick,
+    .covX = this->P[KC_STATE_X][KC_STATE_X],
+    .covY = this->P[KC_STATE_Y][KC_STATE_Y],
+    .covZ = this->P[KC_STATE_Z][KC_STATE_Z],
+    
+    .covPX = this->P[KC_STATE_PX][KC_STATE_PX],
+    .covPY = this->P[KC_STATE_PY][KC_STATE_PY],
+    .covPZ = this->P[KC_STATE_PZ][KC_STATE_PZ],
+    
+    .covD0 = this->P[KC_STATE_D0][KC_STATE_D0],
+    .covD1 = this->P[KC_STATE_D1][KC_STATE_D1],
+    .covD2 = this->P[KC_STATE_D2][KC_STATE_D2]
+  };
+
   assertStateNotNaN(this);
 }
 

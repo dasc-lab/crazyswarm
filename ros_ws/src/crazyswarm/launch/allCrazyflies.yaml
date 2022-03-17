@@ -2,4 +2,4 @@ crazyflies:
   - id: 1
     channel: 6
     initialPosition: [0.0, 0.0, 0.0]
-    type: default_safety
+    type: default #_safety

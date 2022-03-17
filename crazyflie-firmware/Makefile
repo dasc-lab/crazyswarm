@@ -369,7 +369,9 @@ endif
 #################### Targets ###############################
 
 
-all: bin/ bin/dep bin/vendor check_submodules build
+# all: bin/ bin/dep bin/vendor check_submodules build
+all: bin/ bin/dep bin/vendor  build
+
 build:
 # Each target is in a different line, so they are executed one after the other even when the processor has multiple cores (when the -j option for the make command is > 1). See: https://www.gnu.org/software/make/manual/html_node/Parallel.html
 	@$(MAKE) --no-print-directory clean_version CRAZYFLIE_BASE=$(CRAZYFLIE_BASE)

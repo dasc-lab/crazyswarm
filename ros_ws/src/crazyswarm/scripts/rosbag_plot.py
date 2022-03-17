@@ -9,7 +9,8 @@ import matplotlib
 import matplotlib.pyplot as plt
 from mpl_toolkits import mplot3d
 
-T_STAB = 4.0
+T_STAB = 0.0
+X_BARR = 0.5
 
 files = glob.glob("../bags/*.bag")
 
@@ -99,5 +100,5 @@ plt.plot(xs[cmd_inds], ys[cmd_inds], color="red")
 plt.plot(cmd_xs, cmd_ys, 'g.')
 
 plt.gca().set_aspect('equal')
-plt.axvline(x=0.75, linestyle='--')
+plt.axvline(x=X_BARR, linestyle='--')
 plt.show()

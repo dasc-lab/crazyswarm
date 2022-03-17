@@ -104,7 +104,14 @@ static float r_pitch;
 static float r_yaw;
 static float accelz;
 
+static uint8_t safety_method = 3;
+
 // static int counter = 0;
+
+// SAFETY PARAMETERS
+static float x_barrier = 0.75;
+static float alpha0 = 2.0;
+static float alpha1 = 1.0;
 
 void controllerGeometricReset(void)
 {
@@ -125,6 +132,97 @@ bool controllerGeometricTest(void)
 {
   return true;
 }
+
+struct vec safety_filter(struct vec target_thrust, const state_t *state, const uint32_t tick){
+
+  switch (safety_method)
+  {
+  case 0: // no filter
+    return safety_filter_none(target_thrust, state, tick);
+  case 1: // baseline filter (CBF based)
+    return safety_filter_CBF(target_thrust, state, tick);
+  // case 2:
+  //   return safety_filter_none(target_thrust, state, tick);
+  //   break;
+  case 3: // approach 2
+    return safety_filter_approach2(target_thrust, state, tick);
+  default:
+    return safety_filter_none(target_thrust, state, tick);
+  }
+
+}
+
+struct vec safety_filter_none(struct vec target_thrust, const state_t *state, const uint32_t tick){
+
+    // DEBUG_PRINT("RUNNING THE SAFETY FILTER\n");
+    return mkvec(target_thrust.x, target_thrust.y, target_thrust.z);
+}
+
+struct vec safety_filter_CBF(struct vec target_thrust, const state_t *state, const uint32_t tick){
+
+  float x = state->position.x;
+  float vx = state->velocity.x;
+  float ax_des = target_thrust.x/g_vehicleMass;
+
+  // float hnom = x_barrier - x;
+
+  float h = -vx  + alpha0 * (x_barrier - x);
+  float Lfh = -alpha0 * vx;
+  float Lgh = -1.0;
+
+  float left_hand_side = Lfh + alpha1 * h;
+
+  if (left_hand_side + Lgh * ax_des >= 0.0f){
+    return mkvec(target_thrust.x, target_thrust.y, target_thrust.z);
+  }
+
+  // else correction needed
+  float ax_safe = -left_hand_side / Lgh;
+
+  DEBUG_PRINT("CORRECTION!\n");
+  return mkvec(ax_safe*g_vehicleMass, target_thrust.y, target_thrust.z);
+
+
+}
+
+
+struct vec safety_filter_approach2(struct vec target_thrust, const state_t *state, const uint32_t tick){
+
+  float x = state->position.x;
+  float vx = state->velocity.x;
+  float ax_des = target_thrust.x/g_vehicleMass;
+  float cov_x = state->covMatrix.covX;
+  float cov_vx = state->covMatrix.covPX;
+
+  float delta_x = 3.09f * sqrtf(cov_x); // 99.8% conf interval
+  float delta_vx =  3.09f * sqrtf(cov_vx);
+
+
+  // float hnom = x_barrier - x;
+
+  float h = -vx  + alpha0 * (x_barrier - x);
+  float Lfh = -alpha0 * vx;
+  float Lgh = -1.0;
+
+
+  float max_err_x = (alpha0 * alpha1) * delta_x;
+  float max_err_vx = (alpha0 + alpha1) * delta_vx;
+
+  float left_hand_side = Lfh + alpha1 * h - max_err_x - max_err_vx;
+
+  if (left_hand_side + Lgh * ax_des >= 0.0f){
+    return mkvec(target_thrust.x, target_thrust.y, target_thrust.z);
+  }
+
+  // else correction needed
+  float ax_safe = -left_hand_side / Lgh;
+
+  DEBUG_PRINT("CORRECTION! x: %f vx: %f\n", delta_x, delta_vx);
+  return mkvec(ax_safe*g_vehicleMass, target_thrust.y, target_thrust.z);
+
+
+}
+  
 
 void controllerGeometric(control_t *control, setpoint_t *setpoint,
                                          const sensorData_t *sensors,
@@ -185,6 +283,10 @@ void controllerGeometric(control_t *control, setpoint_t *setpoint,
       target_thrust.z = 1;
     }
   }
+
+  // SAFETY FILTER INSERTS HERE!
+  target_thrust = safety_filter(target_thrust, state, tick);
+
 
   // Rate-controlled YAW is moving YAW angle setpoint
   if (setpoint->mode.yaw == modeVelocity) {
@@ -346,6 +448,10 @@ PARAM_ADD(PARAM_FLOAT, ki_m_z, &ki_m_z)
 PARAM_ADD(PARAM_FLOAT, kd_omega_rp, &kd_omega_rp)
 PARAM_ADD(PARAM_FLOAT, i_range_m_xy, &i_range_m_xy)
 PARAM_ADD(PARAM_FLOAT, i_range_m_z, &i_range_m_z)
+PARAM_ADD(PARAM_FLOAT, alpha0, &alpha0)
+PARAM_ADD(PARAM_FLOAT, alpha1, &alpha1)
+PARAM_ADD(PARAM_FLOAT, x_barrier, &x_barrier)
+PARAM_ADD(PARAM_UINT8, safety_method, &safety_method)
 PARAM_GROUP_STOP(ctrlGeo)
 
 LOG_GROUP_START(ctrlGeo)

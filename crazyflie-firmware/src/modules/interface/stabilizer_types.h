@@ -151,12 +151,32 @@ typedef struct sensorData_s {
   uint64_t interruptTimestamp;
 } sensorData_t;
 
+
+// struct to hold state estimate covariances
+typedef struct covMatrix_s {
+  uint32_t timestamp;
+  
+  float covX;
+  float covY;
+  float covZ;
+
+  float covPX; // covariance on velocity
+  float covPY;
+  float covPZ;
+
+  float covD0;
+  float covD1;
+  float covD2;
+
+} covMatrix_t;
+
 typedef struct state_s {
   attitude_t attitude;      // deg (legacy CF2 body coordinate system, where pitch is inverted)
   quaternion_t attitudeQuaternion;
   point_t position;         // m
   velocity_t velocity;      // m/s
   acc_t acc;                // Gs (but acc.z without considering gravity)
+  covMatrix_t covMatrix;    // covariance matrix on state
 } state_t;
 
 typedef struct control_s {
@@ -169,7 +189,8 @@ typedef struct control_s {
 typedef enum mode_e {
   modeDisable = 0,
   modeAbs,
-  modeVelocity
+  modeVelocity,
+  modeAccel
 } stab_mode_t;
 
 typedef struct setpoint_s {

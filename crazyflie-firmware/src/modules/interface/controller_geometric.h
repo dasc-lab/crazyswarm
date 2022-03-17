@@ -35,6 +35,13 @@ void controllerGeometric(control_t *control, setpoint_t *setpoint,
                                          const state_t *state,
                                          const uint32_t tick);
 
-// void safetyCriticalModify(setpoint_t * setpoint);
+struct vec safety_filter(struct vec target_thrust, const state_t *state, const uint32_t tick);
+
+struct vec safety_filter_none(struct vec target_thrust, const state_t *state, const uint32_t tick);
+struct vec safety_filter_CBF(struct vec target_thrust, const state_t *state, const uint32_t tick);
+struct vec safety_filter_approach1(struct vec target_thrust, const state_t *state, const uint32_t tick);
+struct vec safety_filter_approach2(struct vec target_thrust, const state_t *state, const uint32_t tick);
+
+  
 
 #endif //__CONTROLLER_GEOMETRIC_H__
