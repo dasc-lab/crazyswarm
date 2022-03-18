@@ -21,7 +21,7 @@ def executeTrajectory(timeHelper, cf, trajpath, rate=100, offset=np.zeros(3)):
             e = traj.eval(traj.duration)
             return e.pos + np.array(cf.initialPosition) + offset, e.yaw
 
-        e = traj.eval(t)
+        e = traj.eval(t) # HACK TO MAKE IT GO THE WRONG WAY
         cf.cmdFullState(
             e.pos + np.array(cf.initialPosition) + offset,
             e.vel,
@@ -45,7 +45,7 @@ if __name__ == "__main__":
     timeHelper.sleep(Z+2.0)
 
     print("EXECUTING")
-    last_pos, last_yaw = executeTrajectory(timeHelper, cf, "figure8.csv", rate, offset=np.array([0, 0, 0.5]))
+    last_pos, last_yaw = executeTrajectory(timeHelper, cf, "figure8_rev.csv", rate, offset=np.array([0, 0, 0.5]))
     # timeHelper.sleep(3.0)
 
     print("LANDING")

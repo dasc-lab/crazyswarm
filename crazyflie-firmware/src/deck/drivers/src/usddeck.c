@@ -333,6 +333,7 @@ static void usdInit(DeckInfo *info)
         char* endptr;
         TCHAR* line = f_gets_without_comments(readBuffer, sizeof(readBuffer), &logFile);
         if (!line) break;
+        // DEBUG_PRINT("LINE: %c",line);
         usdLogConfig.frequency = strtol(line, &endptr, 10);
         // strtol(line, &usdLogConfig.frequency, 10);
         line = f_gets_without_comments(readBuffer, sizeof(readBuffer), &logFile);
@@ -384,11 +385,15 @@ static void usdInit(DeckInfo *info)
         }
         f_close(&logFile);
 
+        if (usdLogConfig.bufferSize < 255){
+          usdLogConfig.bufferSize=255;
+        }
+
         DEBUG_PRINT("Config read [OK].\n");
         DEBUG_PRINT("Frequency: %dHz. Buffer size: %d\n",
                     usdLogConfig.frequency, usdLogConfig.bufferSize);
         DEBUG_PRINT("enOnStartup: %d. mode: %d\n", usdLogConfig.enableOnStartup, usdLogConfig.mode);
-        DEBUG_PRINT("slots: %d, %d\n", usdLogConfig.numSlots, usdLogConfig.numBytes);
+        DEBUG_PRINT("slots: %d, size_of_slots: %d\n", usdLogConfig.numSlots, usdLogConfig.numBytes);
 
         /* create usd-log task */
         xTaskCreate(usdLogTask, USDLOG_TASK_NAME,

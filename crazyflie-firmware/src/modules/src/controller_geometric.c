@@ -103,8 +103,27 @@ static float r_roll;
 static float r_pitch;
 static float r_yaw;
 static float accelz;
+static float cmd_thrust_x;
+static float cmd_thrust_y;
+static float cmd_thrust_z;
+static float safe_thrust_x;
+static float safe_thrust_y;
+static float safe_thrust_z;
+static float log_state_x;
+static float log_state_y;
+static float log_state_z;
+static float log_state_vx;
+static float log_state_vy;
+static float log_state_vz;
+static float log_state_cov_x;
+static float log_state_cov_vx;
+static float log_h;
+static float log_h_nom;
 
+// SAFETY METHOD
 static uint8_t safety_method = 3;
+static float safety_conf_beta = 3.0;
+
 
 // static int counter = 0;
 
@@ -179,7 +198,7 @@ struct vec safety_filter_CBF(struct vec target_thrust, const state_t *state, con
   // else correction needed
   float ax_safe = -left_hand_side / Lgh;
 
-  DEBUG_PRINT("CORRECTION!\n");
+  // DEBUG_PRINT("CORRECTION!\n");
   return mkvec(ax_safe*g_vehicleMass, target_thrust.y, target_thrust.z);
 
 
@@ -194,8 +213,8 @@ struct vec safety_filter_approach2(struct vec target_thrust, const state_t *stat
   float cov_x = state->covMatrix.covX;
   float cov_vx = state->covMatrix.covPX;
 
-  float delta_x = 3.09f * sqrtf(cov_x); // 99.8% conf interval
-  float delta_vx =  3.09f * sqrtf(cov_vx);
+  float delta_x = safety_conf_beta * sqrtf(cov_x); // 99.8% conf interval
+  float delta_vx =  safety_conf_beta * sqrtf(cov_vx);
 
 
   // float hnom = x_barrier - x;
@@ -203,7 +222,6 @@ struct vec safety_filter_approach2(struct vec target_thrust, const state_t *stat
   float h = -vx  + alpha0 * (x_barrier - x);
   float Lfh = -alpha0 * vx;
   float Lgh = -1.0;
-
 
   float max_err_x = (alpha0 * alpha1) * delta_x;
   float max_err_vx = (alpha0 + alpha1) * delta_vx;
@@ -217,7 +235,7 @@ struct vec safety_filter_approach2(struct vec target_thrust, const state_t *stat
   // else correction needed
   float ax_safe = -left_hand_side / Lgh;
 
-  DEBUG_PRINT("CORRECTION! x: %f vx: %f\n", delta_x, delta_vx);
+  // DEBUG_PRINT("CORRECTION! x: %f vx: %f\n", delta_x, delta_vx);
   return mkvec(ax_safe*g_vehicleMass, target_thrust.y, target_thrust.z);
 
 
@@ -240,11 +258,31 @@ void controllerGeometric(control_t *control, setpoint_t *setpoint,
   struct vec eR, ew, M;
   float dt;
   float desiredYaw = 0; //deg
+  long counter = 0;
 
   if (!RATE_DO_EXECUTE(ATTITUDE_RATE, tick)) {
     return;
   }
+  
+  // log variables
+  log_state_x = state->position.x;
+  log_state_y = state->position.y;
+  log_state_z = state->position.z;
+  log_state_vx = state->velocity.x;
+  log_state_vy = state->velocity.y;
+  log_state_vz = state->velocity.z;
+  log_state_cov_x = state->covMatrix.covX;
+  log_state_cov_vx = state->covMatrix.covPX;
+  log_h_nom = x_barrier - log_state_x;
+  log_h = -log_state_vx  + alpha0 * (x_barrier - log_state_x);
 
+
+  counter ++;
+  if (counter % 50 == 0){
+    DEBUG_PRINT("STD_ERR_X: %f\n", safety_conf_beta * sqrtf(log_state_cov_x));
+  }
+
+  // START
   dt = (float)(1.0f/ATTITUDE_RATE);
   struct vec setpointPos = mkvec(setpoint->position.x, setpoint->position.y, setpoint->position.z);
   struct vec setpointVel = mkvec(setpoint->velocity.x, setpoint->velocity.y, setpoint->velocity.z);
@@ -285,8 +323,17 @@ void controllerGeometric(control_t *control, setpoint_t *setpoint,
   }
 
   // SAFETY FILTER INSERTS HERE!
+  cmd_thrust_x = target_thrust.x; // for logging
+  cmd_thrust_y = target_thrust.y;
+  cmd_thrust_z = target_thrust.z;
+  
   target_thrust = safety_filter(target_thrust, state, tick);
 
+  safe_thrust_x = target_thrust.x; // for logging
+  safe_thrust_y = target_thrust.y;
+  safe_thrust_z = target_thrust.z;
+
+  // SAFETY FILTER ENDS HERE
 
   // Rate-controlled YAW is moving YAW angle setpoint
   if (setpoint->mode.yaw == modeVelocity) {
@@ -452,21 +499,44 @@ PARAM_ADD(PARAM_FLOAT, alpha0, &alpha0)
 PARAM_ADD(PARAM_FLOAT, alpha1, &alpha1)
 PARAM_ADD(PARAM_FLOAT, x_barrier, &x_barrier)
 PARAM_ADD(PARAM_UINT8, safety_method, &safety_method)
+PARAM_ADD(PARAM_FLOAT, safety_conf_beta, &safety_conf_beta)
 PARAM_GROUP_STOP(ctrlGeo)
 
 LOG_GROUP_START(ctrlGeo)
-LOG_ADD(LOG_FLOAT, cmd_thrust, &cmd_thrust)
-LOG_ADD(LOG_FLOAT, cmd_roll, &cmd_roll)
-LOG_ADD(LOG_FLOAT, cmd_pitch, &cmd_pitch)
-LOG_ADD(LOG_FLOAT, cmd_yaw, &cmd_yaw)
-LOG_ADD(LOG_FLOAT, r_roll, &r_roll)
-LOG_ADD(LOG_FLOAT, r_pitch, &r_pitch)
-LOG_ADD(LOG_FLOAT, r_yaw, &r_yaw)
-LOG_ADD(LOG_FLOAT, accelz, &accelz)
-LOG_ADD(LOG_FLOAT, zdx, &z_axis_desired.x)
-LOG_ADD(LOG_FLOAT, zdy, &z_axis_desired.y)
-LOG_ADD(LOG_FLOAT, zdz, &z_axis_desired.z)
-LOG_ADD(LOG_FLOAT, i_err_x, &i_error_x)
-LOG_ADD(LOG_FLOAT, i_err_y, &i_error_y)
-LOG_ADD(LOG_FLOAT, i_err_z, &i_error_z)
+// LOG_ADD(LOG_FLOAT, cmd_thrust, &cmd_thrust)
+// LOG_ADD(LOG_FLOAT, cmd_roll, &cmd_roll)
+// LOG_ADD(LOG_FLOAT, cmd_pitch, &cmd_pitch)
+// LOG_ADD(LOG_FLOAT, cmd_yaw, &cmd_yaw)
+// LOG_ADD(LOG_FLOAT, r_roll, &r_roll)
+// LOG_ADD(LOG_FLOAT, r_pitch, &r_pitch)
+// LOG_ADD(LOG_FLOAT, r_yaw, &r_yaw)
+// LOG_ADD(LOG_FLOAT, accelz, &accelz)
+// LOG_ADD(LOG_FLOAT, zdx, &z_axis_desired.x)
+// LOG_ADD(LOG_FLOAT, zdy, &z_axis_desired.y)
+// LOG_ADD(LOG_FLOAT, zdz, &z_axis_desired.z)
+// LOG_ADD(LOG_FLOAT, i_err_x, &i_error_x)
+// LOG_ADD(LOG_FLOAT, i_err_y, &i_error_y)
+// LOG_ADD(LOG_FLOAT, i_err_z, &i_error_z)
+LOG_ADD(LOG_FLOAT, cmd_thrust_x, &cmd_thrust_x)
+// LOG_ADD(LOG_FLOAT, cmd_thrust_y, &cmd_thrust_y)
+// LOG_ADD(LOG_FLOAT, cmd_thrust_z, &cmd_thrust_z)
+LOG_ADD(LOG_FLOAT, safe_thrust_x, &safe_thrust_x)
+// LOG_ADD(LOG_FLOAT, safe_thrust_y, &safe_thrust_y)
+// LOG_ADD(LOG_FLOAT, safe_thrust_z, &safe_thrust_z)
+LOG_ADD(LOG_FLOAT, log_state_x, &log_state_x)
+LOG_ADD(LOG_FLOAT, log_state_y, &log_state_y)
+LOG_ADD(LOG_FLOAT, log_state_z, &log_state_z)
+LOG_ADD(LOG_FLOAT, log_state_vx, &log_state_vx)
+// LOG_ADD(LOG_FLOAT, log_state_vy, &log_state_vy)
+// LOG_ADD(LOG_FLOAT, log_state_vz, &log_state_vz)
+LOG_ADD(LOG_FLOAT, log_state_cov_x, &log_state_cov_x)
+LOG_ADD(LOG_FLOAT, log_state_cov_vx, &log_state_cov_vx)
+LOG_ADD(LOG_FLOAT, log_h_nom, &log_h_nom)
+LOG_ADD(LOG_FLOAT, log_h, &log_h)
+// LOG_ADD(LOG_FLOAT, target_thrust_before_safety_x, &target_thrust_before_safety_x)
+// LOG_ADD(LOG_FLOAT, target_thrust_before_safety_y, &target_thrust_before_safety_y)
+// LOG_ADD(LOG_FLOAT, target_thrust_before_safety_z, &target_thrust_before_safety_z)
+// LOG_ADD(LOG_FLOAT, target_thrust_after_safety_x, &target_thrust_after_safety_x)
+// LOG_ADD(LOG_FLOAT, target_thrust_after_safety_y, &target_thrust_after_safety_y)
+// LOG_ADD(LOG_FLOAT, target_thrust_after_safety_z, &target_thrust_after_safety_z)
 LOG_GROUP_STOP(ctrlGeo)

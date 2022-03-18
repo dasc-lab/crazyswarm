@@ -43,9 +43,10 @@ crazyflieTypes:
         mass: 0.032
         massThrust: 132000
         x_barrier: 0.5
-        alpha0: 2.0
-        alpha1: 4.0
-        safety_method: 1 # 0 for none, 1 for standard CBF, 2 for Approach 1 (not implemented) and 3 for Approach 2
+        alpha0: 5.0
+        alpha1: 5.0
+        safety_method: 0 # 0 for none, 1 for standard CBF, 2 for Approach 1 (not implemented) and 3 for Approach 2
+        safety_conf_beta: 5
   default_safety:
     bigQuad: False
     batteryVoltageWarning: 3.8  # V

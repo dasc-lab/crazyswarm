@@ -30,10 +30,14 @@
           solidRed: 0 # if set to solid color
           headlightEnable: 0
         locSrv:
-          extPosStdDev: 1e-3
-          extQuatStdDev: 0.5e-1
+          extPosStdDev: 2e-2 # specify the position uncertainty from VICON here
+          extQuatStdDev: 1.0e-1 # in which units?
         kalman:
           resetEstimation: 1
+          pNAcc_xy: 0.5
+          pNAcc_z: 1.0
+          pNVel: 0.00005
+          pNPos: 0.00001
       # tracking
       motion_capture_type: "vicon" # one of none,vicon,optitrack,optitrack_closed_source,qualisys,vrpn
       object_tracking_type: "motionCapture" # one of motionCapture,libobjecttracker
