@@ -112,3 +112,6 @@ crazyswarm$ export CSW_PYTHON=python3
   
   roslaunch crazyswarm hover_swarm.launch
   crazyswarm/scripts: python3 niceHover.py
+  
+  need to send data at 30 Hz atleast
+  check out the files cmdFullstate.py
