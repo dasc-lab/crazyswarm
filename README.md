@@ -97,3 +97,18 @@ IN TERMINAL 2:
   
   It might be useful to figure out which channel is best: https://blog.crazyflie.net/?p=18
   
+  
+    ### Notes
+  
+  - check channel number and set ID
+  make -j12 from crazyflie_firmware after pulling
+  
+  :~/crazyswarm$ ./build.sh 
+crazyswarm$ export CSW_PYTHON=python3
+  
+  - crazyswarm/launch/allCrazyflies.yaml
+  - crazyswarm/scripts/: python3 chooser.py
+
+  
+  roslaunch crazyswarm hover_swarm.launch
+  crazyswarm/scripts: python3 niceHover.py
