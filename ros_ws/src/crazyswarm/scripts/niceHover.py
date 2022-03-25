@@ -17,6 +17,8 @@ if __name__ == "__main__":
     for i, cf in enumerate(allcfs.crazyflies):
         pos = np.array(pos0s[i]) + np.array([0, 0, Z])
         cf.goTo(pos, 0, 1.0)
+        # go to this position with yaw 0 in 1 second. then hold it there
+        
 
     #print("press button to continue...")
     #swarm.input.waitUntilButtonPressed()

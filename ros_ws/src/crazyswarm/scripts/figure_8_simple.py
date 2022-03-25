@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from matplotlib.pyplot import waitforbuttonpress
+#from matplotlib.pyplot import waitforbuttonpress
 import numpy as np
 from pycrazyswarm import *
 

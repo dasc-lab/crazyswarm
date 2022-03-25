@@ -4,6 +4,6 @@ crazyflies:
     initialPosition: [1.0, 0.0, 0.0]
     type: default
   - id: 2
-    channel: 40
+    channel: 6
     initialPosition: [0.0, 0.0, 0.0]
     type: default

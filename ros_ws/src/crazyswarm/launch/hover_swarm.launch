@@ -18,7 +18,7 @@
           enHighLevel: 1
         stabilizer:
           estimator: 2 # 1: complementary, 2: kalman
-          controller: 2 # 1: PID, 2: mellinger
+          controller: 1 # 1: PID, 2: mellinger
         ring:
           effect: 16 # 6: double spinner, 7: solid color, 16: packetRate
           solidBlue: 255 # if set to solid color
@@ -27,7 +27,7 @@
           headlightEnable: 0
         locSrv:
           extPosStdDev: 1e-3
-          #extQuatStdDev: 0.5e-1
+          extQuatStdDev: 0.5e-1
         kalman:
           resetEstimation: 1
       # tracking
@@ -41,8 +41,8 @@
       write_csvs: False
       force_no_cache: False
       enable_parameters: True
-      enable_logging: True
-      enable_logging_pose: True
+      enable_logging: False
+      enable_logging_pose: False
     </rosparam>
   </node>
 

@@ -17,12 +17,18 @@ def executeTrajectory(timeHelper, cf, trajpath, rate=100, offset=np.zeros(3)):
             break
 
         e = traj.eval(t)
+        # cf.cmdFullState(
+        #     e.pos + np.array(cf.initialPosition) + offset,
+        #     e.vel,
+        #     e.acc,
+        #     e.yaw,
+        #     e.omega)
         cf.cmdFullState(
             e.pos + np.array(cf.initialPosition) + offset,
             e.vel,
-            e.acc,
-            e.yaw,
-            e.omega)
+            e.acc*0,
+            e.yaw*0,
+            e.omega*0)
 
         timeHelper.sleepForRate(rate)
 

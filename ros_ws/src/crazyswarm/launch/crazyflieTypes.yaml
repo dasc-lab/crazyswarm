@@ -7,7 +7,7 @@ crazyflieTypes:
     dynamicsConfiguration: 0
     firmwareParams:
       ctrlMel:
-        kp_xy: 0.4 #0.6 # p for position
+        kp_xy: 0.4 #0.6 # p for position    #for velocity 
         kd_xy: 0.2 # 0.35 # d for position
         ki_xy: 0.05
         i_range_xy: 2.0
